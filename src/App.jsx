@@ -1,11 +1,22 @@
-import { useState } from 'react';
-import { socket } from 'socket/socket';
+import { useEffect, useState } from 'react';
+import { socket } from 'helpers/socket';
 
 import './App.css';
+import { onMessageListener, requestForToken } from 'helpers/firebase';
 
 function App() {
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
+
+  useEffect(() => {
+    requestForToken()
+
+    onMessageListener()
+      .then(payload => {
+        console.log('Received push message: ', payload);
+      })
+      .catch(err => console.log('Failed to receive push message: ', err));
+  })
 
   const sendMessage = () => {
     if (title && text) {
@@ -41,6 +52,7 @@ function App() {
             setText(e.target.value);
           }}
         ></textarea>
+        <button type="submit">Send</button>
       </form>
     </div>
   );
