@@ -1,61 +1,35 @@
-import { useEffect, useState } from 'react';
-import { socket } from 'helpers/socket';
-
-import './App.css';
-import { onMessageListener, requestForToken } from 'helpers/firebase';
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 
 function App() {
-  const [title, setTitle] = useState('');
-  const [text, setText] = useState('');
-
-  useEffect(() => {
-    requestForToken()
-
-    onMessageListener()
-      .then(payload => {
-        console.log('Received push message: ', payload);
-      })
-      .catch(err => console.log('Failed to receive push message: ', err));
-  })
-
-  const sendMessage = () => {
-    if (title && text) {
-      socket.emit('sendMessage', { title, text });
-      setTitle('');
-      setText('');
-    }
-  };
-
-  const hanleSubmit = e => {
-    e.preventDefault();
-    sendMessage();
-  };
+  const [count, setCount] = useState(0)
 
   return (
-    <div className="App">
-      <h1>Send message</h1>
-      <form className="form" onSubmit={hanleSubmit}>
-        <input
-          type="text"
-          placeholder="Title"
-          value={title}
-          onChange={e => {
-            setTitle(e.target.value);
-          }}
-        />
-        <textarea
-          name=""
-          id=""
-          placeholder="Message"
-          value={text}
-          onChange={e => {
-            setText(e.target.value);
-          }}
-        ></textarea>
-        <button type="submit">Send</button>
-      </form>
-    </div>
-  );
+    <>
+      <div>
+        <a href="https://vitejs.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
+      </div>
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 1)}>
+          count is {count}
+        </button>
+        <p>
+          Edit <code>src/App.jsx</code> and save to test HMR
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+    </>
+  )
 }
 
-export default App;
+export default App
