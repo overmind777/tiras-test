@@ -1,82 +1,47 @@
-import io from "socket.io-client";
-import React, { useEffect, useState } from "react";
-import { getMessaging, getToken } from "firebase/messaging";
-import { initializeApp } from "firebase/app";
+import React,{ useState, useEffect } from 'react';
+import { socket } from 'socket/socket';
 
-import "./App.css";
-
-// Firebase конфігурація
-const firebaseConfig = {
-  apiKey: "AIzaSyA8KeMnqi2JUQos5z9mPUGwCSeeFeIjVN4",
-  authDomain: "tiras-test.firebaseapp.com",
-  projectId: "tiras-test",
-  storageBucket: "tiras-test.appspot.com",
-  messagingSenderId: "790921268840",
-  appId: "1:790921268840:web:aca83ecb58f87d53daf5dd",
-};
-
-// Ініціалізація Firebase
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
-
-const socket = io("https://helloworld-790921268840.us-central1.run.app", {
-  transports: ["websocket", "polling"],
-});
+import './App.css';
+import { generateToken, messaging } from './notifications/firebase';
+import { onMessage } from 'firebase/messaging';
 
 function App() {
-  const [title, setTitle] = useState("");
-  const [textArea, setTextArea] = useState("");
-  const [socketId, setSocketId] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [title, setTitle] = useState('');
+  const [text, setText] = useState('');
+  const [token, setToken] = useState('');
+  const [messages, setMessages] = useState({title:"", text:""});
 
   useEffect(() => {
-    // Запит на дозвіл на сповіщення
-    Notification.requestPermission().then((permission) => {
-      console.log(permission);
-      if (permission === "granted") {
-        console.log("Notification permission granted.");
-      } else {
-        console.warn("Notification permission denied.");
-      }
-    });
-
-    socket.on("connect", () => {
-      console.log("Connected to server, socket id: ", socket.id);
-      setSocketId(socket.id);
-    });
-
-    socket.on("message", (msg) => {
-      console.log("Message from server2: ", msg);
-      setMessages((prevMessages) => [...prevMessages, msg]);
-    });
-
-    return () => {
-      socket.off("connect");
-      socket.off("receivedMessage");
+    const fetchToken = async () => {
+      const generatedToken = await generateToken();
+      setToken(generatedToken);
     };
+
+    fetchToken();
+
+    onMessage(messaging, payload => {
+      console.log('Отримано повідомлення : ', payload);
+      setMessages(prevMessages => [...prevMessages, payload]);
+    });
+
+    socket.on('connect', socket => {
+      console.log('Connected to server, socket id: ', socket);
+    });
   }, []);
 
-  const handleOnSubmit = (e) => {
-    e.preventDefault();
-
-    // Перевірка перед відправкою
-    if (title && textArea) {
-      // Get a registration token
-      getToken(messaging, {
-        vapidKey:
-          "BIaqp2Vm9bc56ajpxT6aJYpe-W-arFzwv3pn5k_v231QFTIRvE6cHhU5YMQkik5-SOpePzXiTNXcg-dyFbbPoho",
-      }).then((token) => {
-        // Send the registration token to your server-side code
-        socket.emit("sendMessage", { title, textArea, token });
-      });
-
-      setTitle("");
-      setTextArea("");
-      console.log("Message sent:", { title, textArea });
-    } else {
-      console.error("Title and textArea must not be empty.");
+  const sendMessage = () => {
+    if (title && text && token) {
+      socket.emit('sendMessage', { title, text, token });
+      setTitle('');
+      setText('');
+      setToken('');
     }
   };
+
+  const handleOnSubmit = (e) => {
+    e.preventDefault()
+    sendMessage()
+  }
 
   return (
     <div className="wrapper">
@@ -91,23 +56,18 @@ function App() {
         <textarea
           name=""
           id=""
-          value={textArea}
+          value={text}
           onChange={(e) => {
-            setTextArea(e.target.value);
+            setText(e.target.value);
           }}
         ></textarea>
         <button type="submit" onClick={handleOnSubmit}>
           Send
         </button>
       </form>
-      <div className="messages">
-        {messages.map((msg, index) => (
-          <div key={index} className="message">
-            <h4>{msg.title}</h4>
-            <p>{msg.textArea}</p>
-          </div>
-        ))}
-      </div>
+      
+      <p>{messages.title}</p>
+      <p>{messages.text}</p>
     </div>
   );
 }
