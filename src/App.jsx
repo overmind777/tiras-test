@@ -1,5 +1,5 @@
 import React,{ useState, useEffect } from 'react';
-import { socket } from 'socket/socket';
+import { socket } from './socket/socket';
 
 import './App.css';
 import { generateToken, messaging } from './notifications/firebase';
@@ -9,7 +9,7 @@ function App() {
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
   const [token, setToken] = useState('');
-  const [messages, setMessages] = useState({title:"", text:""});
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -21,13 +21,13 @@ function App() {
 
     onMessage(messaging, payload => {
       console.log('Отримано повідомлення : ', payload);
-      setMessages(prevMessages => [...prevMessages, payload]);
+      setMessages(prevMessages => [...prevMessages, payload.notification]);
     });
 
     socket.on('connect', socket => {
       console.log('Connected to server, socket id: ', socket);
     });
-  }, []);
+  }, [title]);
 
   const sendMessage = () => {
     if (title && text && token) {
@@ -65,9 +65,14 @@ function App() {
           Send
         </button>
       </form>
-      
-      <p>{messages.title}</p>
-      <p>{messages.text}</p>
+      <h2>Received Messages:</h2>
+      <ul>
+        {messages.map((message, index) => (
+          <li key={index}>
+            <strong>{message.title}</strong>: {message.body}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

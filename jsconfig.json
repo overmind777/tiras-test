@@ -1,14 +1,6 @@
 {
-<<<<<<< HEAD
-	"compilerOptions": {
-		"baseUrl": "./src",
-		"checkJs": true,
-		"jsx": "react"
-	}
-=======
   "compilerOptions": {
     "baseUrl": "src"
   },
   "include": ["src", "public/firebase-messaging-sw.js"]
->>>>>>> 7af4042 (add firebase)
 }

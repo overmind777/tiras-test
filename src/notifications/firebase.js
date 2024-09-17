@@ -18,9 +18,10 @@ const generateToken = async () => {
   const permission = await Notification.requestPermission();
   
   if (permission === 'granted') {
+    console.log(permission);
     const token = await getToken(messaging, {
       vapidKey:
-        'BIaqp2Vm9bc56ajpxT6aJYpe-W-arFzwv3pn5k_v231QFTIRvE6cHhU5YMQkik5-SOpePzXiTNXcg-dyFbbPoho',
+        "BFFnWmiWCR9AFq1zvJ_SLKX01YjjMk-XfevTl7FTZfToJtNbd6dPMAitpsVv-N_bClCNIXnGe8AQIMy18owHXwI",
     });
     console.log('token', token);
 
