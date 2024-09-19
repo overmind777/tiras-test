@@ -27,10 +27,10 @@ function App() {
     socket.on('connect', socket => {
       console.log('Connected to server, socket id: ', socket);
     });
-  }, [title]);
+  }, []);
 
   const sendMessage = () => {
-    if (title && text && token) {
+    if (title && text) {
       socket.emit('sendMessage', { title, text, token });
       setTitle('');
       setText('');
