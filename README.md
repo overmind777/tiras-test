@@ -1,1 +1,1 @@
-homepage: podilska.pp.ua
+homepage: https://tiras-test.web.app/
