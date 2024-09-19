@@ -1,14 +1,24 @@
-import React,{ useState, useEffect } from 'react';
-import { socket } from './socket/socket';
+import React, { useState, useEffect } from "react";
+import { socket } from "./socket/socket";
 
-import './App.css';
-import { generateToken, messaging } from './notifications/firebase';
-import { onMessage } from 'firebase/messaging';
+import "./App.styled.js";
+import { generateToken, messaging } from "./notifications/firebase";
+import { onMessage } from "firebase/messaging";
+
+import {
+  Wrapper,
+  Form,
+  Input,
+  TextArea,
+  Button,
+  List,
+  Item,
+} from "./App.styled";
 
 function App() {
-  const [title, setTitle] = useState('');
-  const [text, setText] = useState('');
-  const [token, setToken] = useState('');
+  const [title, setTitle] = useState("");
+  const [text, setText] = useState("");
+  const [token, setToken] = useState("");
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
@@ -19,61 +29,57 @@ function App() {
 
     fetchToken();
 
-    onMessage(messaging, payload => {
-      console.log('Отримано повідомлення : ', payload);
-      setMessages(prevMessages => [...prevMessages, payload.notification]);
-    });
-
-    socket.on('connect', socket => {
-      console.log('Connected to server, socket id: ', socket);
+    onMessage(messaging, (payload) => {
+      setMessages((prevMessages) => [...prevMessages, payload.notification]);
     });
   }, []);
 
   const sendMessage = () => {
     if (title && text) {
-      socket.emit('sendMessage', { title, text, token });
-      setTitle('');
-      setText('');
-      setToken('');
+      socket.emit("sendMessage", { title, text, token });
+      setTitle("");
+      setText("");
     }
   };
 
   const handleOnSubmit = (e) => {
-    e.preventDefault()
-    sendMessage()
-  }
+    e.preventDefault();
+    sendMessage();
+  };
 
   return (
-    <div className="wrapper">
-      <form action="" className="form" onSubmit={handleOnSubmit}>
-        <input
+    <Wrapper>
+      <Form action="" onSubmit={handleOnSubmit}>
+        <Input
+          placeholder="Title"
           type="text"
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
           }}
         />
-        <textarea
+        <TextArea
+          placeholder="Message"
           name=""
           id=""
           value={text}
           onChange={(e) => {
             setText(e.target.value);
           }}
-        ></textarea>
-        <button type="submit" onClick={handleOnSubmit}>
+        ></TextArea>
+        <Button type="submit" onClick={handleOnSubmit}>
           Send
-        </button>
-      </form>
-      <h2>Received Messages:</h2>
-      <ul>
-        {messages.map((message, index) => (
-          <li key={index}>
-            <strong>{message.title}</strong>: {message.body}
-          </li>
-        ))}
-      </ul>
-    </div>
+        </Button>
+        <h2>Received Messages:</h2>
+        <List>
+          {messages.map((message, index) => (
+            <Item key={index}>
+              <strong>{message.title}</strong>: {message.body}
+            </Item>
+          ))}
+        </List>
+      </Form>
+    </Wrapper>
   );
 }
 
